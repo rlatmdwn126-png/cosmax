@@ -166,25 +166,33 @@ st.divider()
 # ---------------------------------------------------------------------------
 st.subheader("검사 결과 입력")
 
-product_options = ["직접 입력"] + st.session_state.products
 with st.form("result_form", clear_on_submit=True):
     fc1, fc2 = st.columns(2)
     with fc1:
-        product_choice = st.selectbox("제품명", product_options, key="product_choice")
-        product_free = st.text_input("새 제품명 입력", key="product_free") if product_choice == "직접 입력" else ""
+        product_input = st.selectbox(
+            "제품명",
+            st.session_state.products,
+            index=None,
+            accept_new_options=True,
+            placeholder="제품명을 입력하거나 목록에서 선택하세요",
+            key="product_choice",
+        )
     with fc2:
         batch_no = st.text_input("배치번호", placeholder="예: B2607-01")
 
-    product_name = product_free.strip() if product_choice == "직접 입력" else product_choice
+    product_name = (product_input or "").strip()
     matched_specs = [s for s in st.session_state.specs if s["product"].lower() == product_name.lower()]
     item_source = matched_specs if matched_specs else st.session_state.specs
     item_names = sorted({s["name"] for s in item_source}) or ["등록된 항목 없음"]
 
-    fc3, fc4 = st.columns(2)
+    fc3, fc4, fc5 = st.columns(3)
     with fc3:
         item_name = st.selectbox("검사항목", item_names)
     with fc4:
         measured_value = st.number_input("측정값", value=0.0, format="%.4f")
+    with fc5:
+        matched_spec_for_unit = find_spec(product_name, item_name) if product_name and item_name != "등록된 항목 없음" else None
+        st.text_input("단위", value=matched_spec_for_unit["unit"] if matched_spec_for_unit else "", disabled=True)
 
     submitted = st.form_submit_button("결과 등록", type="primary")
 
