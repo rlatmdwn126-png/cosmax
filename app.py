@@ -96,6 +96,10 @@ if "results" not in st.session_state:
     st.session_state.results = build_default_results()
 if "show_fail_only" not in st.session_state:
     st.session_state.show_fail_only = False
+if "editing_spec_id" not in st.session_state:
+    st.session_state.editing_spec_id = None
+if "deleting_spec_id" not in st.session_state:
+    st.session_state.deleting_spec_id = None
 
 
 def ensure_product(name: str):
@@ -271,11 +275,46 @@ with st.expander("제품별 검사항목 스펙(규격) 관리"):
         for product, spec_list in by_product.items():
             st.markdown(f"**{product}**")
             for s in spec_list:
-                row_c1, row_c2 = st.columns([5, 1])
-                row_c1.write(f"{s['name']} | {s['min']} ~ {s['max']} {s['unit']}")
-                if row_c2.button("삭제", key=f"del_{s['id']}"):
-                    st.session_state.specs = [x for x in st.session_state.specs if x["id"] != s["id"]]
-                    st.rerun()
+                if st.session_state.editing_spec_id == s["id"]:
+                    ec1, ec2, ec3, ec4, ec5 = st.columns([2, 2, 1.5, 1.5, 1])
+                    edit_name = ec1.text_input("항목명", value=s["name"], key=f"edit_name_{s['id']}")
+                    edit_unit = ec2.text_input("단위", value=s["unit"], key=f"edit_unit_{s['id']}")
+                    edit_min = ec3.number_input("하한값", value=float(s["min"]), format="%.4f", key=f"edit_min_{s['id']}")
+                    edit_max = ec4.number_input("상한값", value=float(s["max"]), format="%.4f", key=f"edit_max_{s['id']}")
+                    with ec5:
+                        st.write("")
+                        st.write("")
+                        if st.button("완료", key=f"save_{s['id']}"):
+                            if not edit_name.strip():
+                                st.error("항목명을 입력해 주세요.")
+                            elif edit_min > edit_max:
+                                st.error("하한값이 상한값보다 클 수 없습니다.")
+                            else:
+                                s["name"] = edit_name.strip()
+                                s["unit"] = edit_unit.strip()
+                                s["min"] = edit_min
+                                s["max"] = edit_max
+                                st.session_state.editing_spec_id = None
+                                st.rerun()
+                elif st.session_state.deleting_spec_id == s["id"]:
+                    dc1, dc2, dc3 = st.columns([5, 1, 1])
+                    dc1.warning(f"'{s['name']}' 항목을 정말 삭제하시겠습니까?")
+                    if dc2.button("삭제 확인", key=f"confirm_del_{s['id']}"):
+                        st.session_state.specs = [x for x in st.session_state.specs if x["id"] != s["id"]]
+                        st.session_state.deleting_spec_id = None
+                        st.rerun()
+                    if dc3.button("취소", key=f"cancel_del_{s['id']}"):
+                        st.session_state.deleting_spec_id = None
+                        st.rerun()
+                else:
+                    row_c1, row_c2, row_c3 = st.columns([5, 1, 1])
+                    row_c1.write(f"{s['name']} | {s['min']} ~ {s['max']} {s['unit']}")
+                    if row_c2.button("수정", key=f"edit_{s['id']}"):
+                        st.session_state.editing_spec_id = s["id"]
+                        st.rerun()
+                    if row_c3.button("삭제", key=f"del_{s['id']}"):
+                        st.session_state.deleting_spec_id = s["id"]
+                        st.rerun()
 
 st.divider()
 
