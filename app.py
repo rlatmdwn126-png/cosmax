@@ -153,11 +153,7 @@ fail_today = len([r for r in todays if r["verdict"] == "fail"])
 c1, c2, c3 = st.columns(3)
 c1.metric("오늘 검사", total_today)
 c2.metric("합격", pass_today)
-with c3:
-    st.metric("부적합", fail_today)
-    if st.button("부적합만 모아보기" if not st.session_state.show_fail_only else "전체보기", key="toggle_fail"):
-        st.session_state.show_fail_only = not st.session_state.show_fail_only
-        st.rerun()
+c3.metric("부적합", fail_today)
 
 st.divider()
 
@@ -286,7 +282,13 @@ st.divider()
 # ---------------------------------------------------------------------------
 # 검사 결과 이력
 # ---------------------------------------------------------------------------
-st.subheader("검사 결과 이력")
+col_hist_title, col_hist_btn = st.columns([6, 1])
+with col_hist_title:
+    st.subheader("검사 결과 이력")
+with col_hist_btn:
+    if st.button("전체보기" if st.session_state.show_fail_only else "부적합만 보기", key="toggle_fail"):
+        st.session_state.show_fail_only = not st.session_state.show_fail_only
+        st.rerun()
 
 if st.session_state.show_fail_only:
     st.info("부적합 항목만 보고 있습니다.")
@@ -315,7 +317,12 @@ else:
             "판정": label,
         })
     result_df = pd.DataFrame(rows)
-    st.dataframe(result_df, use_container_width=True, hide_index=True)
+
+    def highlight_verdict(col):
+        return ["color: #d32f2f; font-weight: 700;" if "부적합" in str(v) else "" for v in col]
+
+    styled_df = result_df.style.apply(highlight_verdict, subset=["판정"])
+    st.dataframe(styled_df, use_container_width=True, hide_index=True)
 
     csv_bytes = result_df.to_csv(index=False).encode("utf-8-sig")
     st.download_button("결과 CSV 다운로드", data=csv_bytes, file_name="qc_results.csv", mime="text/csv")
