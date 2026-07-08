@@ -1,3 +1,4 @@
+import html
 import os
 import uuid
 from datetime import datetime, date
@@ -6,25 +7,6 @@ import pandas as pd
 import streamlit as st
 
 st.set_page_config(page_title="QC SpecChecker", page_icon="🍎", layout="wide")
-
-st.markdown(
-    """
-    <style>
-    div[data-testid="stTextInput"],
-    div[data-testid="stTextInput"] div[data-baseweb="base-input"],
-    div[data-testid="stTextInput"] input,
-    div[data-testid="stTextInput"] input:disabled {
-        opacity: 1 !important;
-    }
-    div[data-testid="stTextInput"] input,
-    div[data-testid="stTextInput"] input:disabled {
-        color: #000000 !important;
-        -webkit-text-fill-color: #000000 !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
 
 # ---------------------------------------------------------------------------
 # 기본 데이터
@@ -211,7 +193,24 @@ with st.container(border=True):
         measured_value = st.number_input("측정값", value=0.0, format="%.4f", key="measured_value_input")
     with fc5:
         matched_spec_for_unit = find_spec(product_name, item_name) if product_name and item_name != "등록된 항목 없음" else None
-        st.text_input("단위", value=matched_spec_for_unit["unit"] if matched_spec_for_unit else "", disabled=True)
+        unit_display = matched_spec_for_unit["unit"] if matched_spec_for_unit else "-"
+        st.markdown(
+            f"""
+            <div style="margin-bottom:0.25rem; font-size:0.875rem;">단위</div>
+            <div style="
+                border:1px solid rgba(49,51,63,0.3);
+                border-radius:0.5rem;
+                padding:0.5rem 0.75rem;
+                background-color:#ffffff;
+                color:#000000 !important;
+                font-size:1rem;
+                min-height:2.6rem;
+                display:flex;
+                align-items:center;
+            ">{html.escape(str(unit_display))}</div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     submitted = st.button("결과 등록", type="primary", key="submit_result_btn")
 
