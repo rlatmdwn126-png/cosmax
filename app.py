@@ -246,8 +246,14 @@ st.divider()
 with st.expander("제품별 검사항목 스펙(규격) 관리"):
     sc1, sc2, sc3, sc4, sc5 = st.columns(5)
     with sc1:
-        spec_product_choice = st.selectbox("제품명", ["직접 입력"] + st.session_state.products, key="spec_product_choice")
-        spec_product_free = st.text_input("새 제품명", key="spec_product_free") if spec_product_choice == "직접 입력" else ""
+        spec_product_input = st.selectbox(
+            "제품명",
+            st.session_state.products,
+            index=None,
+            accept_new_options=True,
+            placeholder="제품명을 입력하거나 목록에서 선택하세요",
+            key="spec_product_choice",
+        )
     with sc2:
         spec_name = st.text_input("항목명", placeholder="예: pH", key="spec_name_input")
     with sc3:
@@ -257,7 +263,7 @@ with st.expander("제품별 검사항목 스펙(규격) 관리"):
     with sc5:
         spec_max = st.number_input("상한값", value=0.0, format="%.4f", key="spec_max_input")
 
-    spec_product_name = spec_product_free.strip() if spec_product_choice == "직접 입력" else spec_product_choice
+    spec_product_name = (spec_product_input or "").strip()
 
     if st.button("스펙 추가"):
         if not spec_product_name or not spec_name.strip():
