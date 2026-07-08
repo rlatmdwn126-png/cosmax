@@ -10,9 +10,15 @@ st.set_page_config(page_title="QC SpecChecker", page_icon="🍎", layout="wide")
 st.markdown(
     """
     <style>
+    div[data-testid="stTextInput"],
+    div[data-testid="stTextInput"] div[data-baseweb="base-input"],
+    div[data-testid="stTextInput"] input,
+    div[data-testid="stTextInput"] input:disabled {
+        opacity: 1 !important;
+    }
+    div[data-testid="stTextInput"] input,
     div[data-testid="stTextInput"] input:disabled {
         color: #000000 !important;
-        opacity: 1 !important;
         -webkit-text-fill-color: #000000 !important;
     }
     </style>
