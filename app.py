@@ -7,6 +7,19 @@ import streamlit as st
 
 st.set_page_config(page_title="QC SpecChecker", page_icon="🍎", layout="wide")
 
+st.markdown(
+    """
+    <style>
+    div[data-testid="stTextInput"] input:disabled {
+        color: #000000 !important;
+        opacity: 1 !important;
+        -webkit-text-fill-color: #000000 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 # ---------------------------------------------------------------------------
 # 기본 데이터
 # ---------------------------------------------------------------------------
