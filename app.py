@@ -166,7 +166,7 @@ st.divider()
 # ---------------------------------------------------------------------------
 st.subheader("검사 결과 입력")
 
-with st.form("result_form", clear_on_submit=True):
+with st.container(border=True):
     fc1, fc2 = st.columns(2)
     with fc1:
         product_input = st.selectbox(
@@ -178,7 +178,7 @@ with st.form("result_form", clear_on_submit=True):
             key="product_choice",
         )
     with fc2:
-        batch_no = st.text_input("배치번호", placeholder="예: B2607-01")
+        batch_no = st.text_input("배치번호", placeholder="예: B2607-01", key="batch_no_input")
 
     product_name = (product_input or "").strip()
     matched_specs = [s for s in st.session_state.specs if s["product"].lower() == product_name.lower()]
@@ -189,12 +189,12 @@ with st.form("result_form", clear_on_submit=True):
     with fc3:
         item_name = st.selectbox("검사항목", item_names)
     with fc4:
-        measured_value = st.number_input("측정값", value=0.0, format="%.4f")
+        measured_value = st.number_input("측정값", value=0.0, format="%.4f", key="measured_value_input")
     with fc5:
         matched_spec_for_unit = find_spec(product_name, item_name) if product_name and item_name != "등록된 항목 없음" else None
         st.text_input("단위", value=matched_spec_for_unit["unit"] if matched_spec_for_unit else "", disabled=True)
 
-    submitted = st.form_submit_button("결과 등록", type="primary")
+    submitted = st.button("결과 등록", type="primary", key="submit_result_btn")
 
 if submitted:
     if not product_name or item_name == "등록된 항목 없음":
@@ -232,6 +232,10 @@ if submitted:
                 st.success(f"합격 판정입니다. (측정값: {measured_value}, 규격: {spec['min']}~{spec['max']} {spec['unit']})")
             else:
                 st.error(f"부적합 판정입니다. (측정값: {measured_value}, 규격: {spec['min']}~{spec['max']} {spec['unit']})")
+
+            st.session_state.product_choice = None
+            st.session_state.batch_no_input = ""
+            st.session_state.measured_value_input = 0.0
             st.rerun()
 
 st.divider()
