@@ -186,9 +186,12 @@ with st.container(border=True):
     item_source = matched_specs if matched_specs else st.session_state.specs
     item_names = sorted({s["name"] for s in item_source}) or ["등록된 항목 없음"]
 
+    if st.session_state.get("item_name_choice") not in item_names:
+        st.session_state.item_name_choice = item_names[0]
+
     fc3, fc4, fc5 = st.columns(3)
     with fc3:
-        item_name = st.selectbox("검사항목", item_names)
+        item_name = st.selectbox("검사항목", item_names, key="item_name_choice")
     with fc4:
         measured_value = st.number_input("측정값", value=0.0, format="%.4f", key="measured_value_input")
     with fc5:
